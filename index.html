@@ -2530,6 +2530,38 @@ if(inputBuktiVideo){
 
 
 /* =========================
+   GOOGLE SHEETS + GMAIL
+========================= */
+
+const ABSENSI_API_URL = "https://script.google.com/macros/s/AKfycbwrXEwTjfqB6VVZpIl07e1bF94tvJDy4lSOhE6w_2v67vajEbq-shaGzyKRuwa__MEM/exec";
+const ABSENSI_KELAS = "8C";
+
+async function kirimKeGoogleSheets(data){
+    const body = new URLSearchParams();
+    body.append("nama", data.nama || "");
+    body.append("kelas", ABSENSI_KELAS);
+    body.append("status", data.status || "");
+    body.append("keterangan", data.keterangan || "");
+    body.append("email", data.email || "");
+
+    try{
+        await fetch(ABSENSI_API_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+            },
+            body: body.toString(),
+            cache: "no-store"
+        });
+        return true;
+    }catch(error){
+        console.error("Gagal mengirim absensi ke Google Sheets:", error);
+        return false;
+    }
+}
+
+/* =========================
    KIRIM ABSENSI
 ========================= */
 
@@ -2679,6 +2711,13 @@ async function kirimAbsensi(){
         videoId:videoId
     });
 
+    const terkirimKeGoogle = await kirimKeGoogleSheets({
+        nama: nama,
+        status: status,
+        keterangan: keterangan,
+        email: ""
+    });
+
     simpanData(data);
     localStorage.setItem("absensi_nama_terakhir", nama);
     tampilkanData();
@@ -2710,8 +2749,12 @@ async function kirimAbsensi(){
         .classList.remove("show");
 
     tampilkanNotifikasi(
-        "Absensi Berhasil! ✅",
-        `${nama} berhasil dicatat sebagai ${status}.`
+        terkirimKeGoogle
+            ? "Absensi Berhasil! ✅"
+            : "Absensi Tersimpan di Perangkat ⚠️",
+        terkirimKeGoogle
+            ? `${nama} berhasil dicatat sebagai ${status}. Data juga dikirim ke Google Sheets.`
+            : `${nama} berhasil dicatat sebagai ${status}, tetapi pengiriman ke Google Sheets gagal. Coba lagi saat koneksi internet stabil.`
     );
 
 }
