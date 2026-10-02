@@ -9313,6 +9313,14 @@ window.addEventListener("error",function(e){console.warn("Aplikasi menangkap err
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ready,{once:true});else ready();
 })();
 </script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js")
+      .catch(err => console.log("Service Worker:", err));
+  });
+}
+</script>
 </body>
 <script id="student-account-security-direct-fix">
 (function(){
